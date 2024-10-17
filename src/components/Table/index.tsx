@@ -3,6 +3,7 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import { PropsWithChildren, useMemo, useState } from 'react';
+import { extractFieldNames } from './services';
 
 interface IResults {
   [key: string]: string;
@@ -15,19 +16,10 @@ interface ITableProps extends PropsWithChildren {
 export default function Table({ results }: ITableProps) {
   const style = useMemo(() => ({ width: '100%', height: '100%' }), []);
 
-  // Row Data: The data to be displayed.
   const [rowData, setRowData] = useState<IResults[]>(results);
 
-  // Column Definitions: Defines & controls grid columns.
   const [colDefs, setColDefs] = useState<ColDef<IResults>[]>([
-    { field: 'name' },
-    { field: 'height' },
-    { field: 'mass' },
-    { field: 'hair_color' },
-    { field: 'skin_color' },
-    { field: 'eye_color' },
-    { field: 'birth_year' },
-    { field: 'gender' },
+    ...extractFieldNames(results),
   ]);
 
   const defaultColDef = useMemo<ColDef>(() => {

@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import './App.css';
 import Table from './components/Table';
 
-// interface ISwapiRow {}
-
 const App = () => {
   const [results, setResults] = useState([]);
 
@@ -16,7 +14,7 @@ const App = () => {
 
     sendRequest();
   }, []);
-  return <Table results={results} />;
+  return <>{results.length ? <Table results={results} /> : 'Loading'}</>;
 };
 
 export default App;
