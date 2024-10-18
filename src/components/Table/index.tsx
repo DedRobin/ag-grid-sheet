@@ -20,15 +20,28 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
   const dispatch = useDispatch();
   const colSizes = useSelector((state: RootState) => state.columns);
 
-  const style = useMemo(() => ({ width: '100%', height: '100%' }), []);
+  const tableStyle = useMemo(() => ({ width: '100%', height: '100%' }), []);
+  const sidebarStyle = useMemo(
+    () => ({ minWidth: '200px', height: '100%' }),
+    []
+  );
 
   const [rowData, setRowData] = useState<IResult[]>([]);
 
   const [colDefs, setColDefs] = useState<ColDef<IResult>[]>([]);
 
-  const defaultColDef = useMemo<ColDef>(() => {
+  const defaultTableColDef = useMemo<ColDef>(() => {
     return {
       cellDataType: false,
+    };
+  }, []);
+
+  const defaultSidebarColDef = useMemo<ColDef>(() => {
+    return {
+      cellDataType: false,
+      resizable: false,
+      sortable: false,
+      flex: 1,
     };
   }, []);
 
@@ -50,14 +63,36 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
   }, [colSizes, loader]);
 
   return (
-    <div className={'ag-theme-quartz-dark'} style={style}>
-      <AgGridReact
-        rowData={rowData}
-        columnDefs={colDefs}
-        defaultColDef={defaultColDef}
-        onColumnResized={onColumnResized}
-        onGridReady={onGridReady}
-      />
+    <div
+      className="grid"
+      style={{ width: '100%', height: '100%', display: 'flex', gap: '20px' }}
+    >
+      <div className={'ag-theme-quartz-dark'} style={tableStyle}>
+        <AgGridReact
+          rowData={rowData}
+          columnDefs={colDefs}
+          defaultColDef={defaultTableColDef}
+          onColumnResized={onColumnResized}
+          onGridReady={onGridReady}
+        />
+      </div>
+      <div className={'ag-theme-quartz-dark'} style={sidebarStyle}>
+        <AgGridReact
+          rowData={[
+            { fieldName: 'Col1' },
+            { fieldName: 'Col2' },
+            { fieldName: 'Col3' },
+          ]}
+          columnDefs={[
+            {
+              headerName: 'Filter',
+              field: 'fieldName',
+              checkboxSelection: true,
+            },
+          ]}
+          defaultColDef={defaultSidebarColDef}
+        />
+      </div>
     </div>
   );
 }
