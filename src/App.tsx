@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import './App.css';
 import Table from './components/Table';
+import './App.css';
 
 const App = () => {
   const [results, setResults] = useState([]);
@@ -14,6 +14,7 @@ const App = () => {
 
     sendRequest();
   }, []);
+
   return <>{results.length ? <Table results={results} /> : 'Loading'}</>;
 };
 
