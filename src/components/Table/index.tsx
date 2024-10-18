@@ -6,7 +6,7 @@ import { PropsWithChildren, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { extractFieldsFromData } from './services';
 import { RootState } from '../../store';
-import { addOrUpdateColWidth } from './slices/ColumnSlice';
+import { addOrUpdateColWidth } from './slices/columnSlice';
 
 export interface IResults {
   [key: string]: string;
@@ -18,7 +18,7 @@ interface ITableProps extends PropsWithChildren {
 
 export default function Table({ results }: ITableProps) {
   const dispatch = useDispatch();
-  const colSizes = useSelector((state: RootState) => state.columnSize);
+  const colSizes = useSelector((state: RootState) => state.columns);
 
   const style = useMemo(() => ({ width: '100%', height: '100%' }), []);
 
