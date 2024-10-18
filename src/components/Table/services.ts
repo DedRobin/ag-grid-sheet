@@ -1,11 +1,11 @@
 import { ColDef } from 'ag-grid-community';
-import { IResults } from '.';
+import { IResult } from '.';
 
 export function extractFieldsFromData(
   results: { [key: string]: string }[],
   colSizes: { [key: string]: number }
-): ColDef<IResults>[] {
-  const fields: ColDef<IResults>[] = [];
+): ColDef<IResult>[] {
+  const fields: ColDef<IResult>[] = [];
 
   const headerNames = Object.keys(results[0]);
   headerNames.forEach((field) => {

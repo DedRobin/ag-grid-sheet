@@ -2,31 +2,29 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import { ColDef, ColumnResizedEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { PropsWithChildren, useMemo, useState } from 'react';
+import { PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { extractFieldsFromData } from './services';
 import { RootState } from '../../store';
 import { addOrUpdateColWidth } from './slices/columnSlice';
 
-export interface IResults {
+export interface IResult {
   [key: string]: string;
 }
 
-interface ITableProps extends PropsWithChildren {
-  results: IResults[];
+interface ITableProps<T> extends PropsWithChildren {
+  loader: () => Promise<T>;
 }
 
-export default function Table({ results }: ITableProps) {
+export default function Table({ loader }: ITableProps<IResult[]>) {
   const dispatch = useDispatch();
   const colSizes = useSelector((state: RootState) => state.columns);
 
   const style = useMemo(() => ({ width: '100%', height: '100%' }), []);
 
-  const [rowData, setRowData] = useState<IResults[]>(results);
+  const [rowData, setRowData] = useState<IResult[]>([]);
 
-  const [colDefs, setColDefs] = useState<ColDef<IResults>[]>([
-    ...extractFieldsFromData(results, colSizes),
-  ]);
+  const [colDefs, setColDefs] = useState<ColDef<IResult>[]>([]);
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -45,6 +43,12 @@ export default function Table({ results }: ITableProps) {
     }
   };
 
+  const onGridReady = useCallback(async () => {
+    const results = await loader();
+    setRowData(results);
+    setColDefs([...extractFieldsFromData(results, colSizes)]);
+  }, [colSizes, loader]);
+
   return (
     <div className={'ag-theme-quartz-dark'} style={style}>
       <AgGridReact
@@ -52,6 +56,7 @@ export default function Table({ results }: ITableProps) {
         columnDefs={colDefs}
         defaultColDef={defaultColDef}
         onColumnResized={onColumnResized}
+        onGridReady={onGridReady}
       />
     </div>
   );
