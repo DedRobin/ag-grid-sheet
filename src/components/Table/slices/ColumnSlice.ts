@@ -6,7 +6,7 @@ export interface ColumnState {
 
 const initialState: ColumnState = {};
 
-export const columWidthSlice = createSlice({
+export const columnSlice = createSlice({
   name: 'columns',
   initialState,
   reducers: {
@@ -17,5 +17,5 @@ export const columWidthSlice = createSlice({
   },
 });
 
-export const { addOrUpdateColWidth } = columWidthSlice.actions;
-export default columWidthSlice.reducer;
+export const { addOrUpdateColWidth } = columnSlice.actions;
+export default columnSlice.reducer;

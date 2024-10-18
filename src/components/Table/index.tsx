@@ -5,8 +5,8 @@ import { AgGridReact } from 'ag-grid-react';
 import { PropsWithChildren, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { extractFieldsFromData } from './services';
-import { addOrUpdateColWidth } from '../../store/colSizeSlice';
 import { RootState } from '../../store';
+import { addOrUpdateColWidth } from './slices/ColumnSlice';
 
 export interface IResults {
   [key: string]: string;
