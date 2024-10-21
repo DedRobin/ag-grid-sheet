@@ -10,12 +10,12 @@ export const columnSlice = createSlice({
   name: 'columns',
   initialState,
   reducers: {
-    addOrUpdateColWidth(state, action: PayloadAction<[string, number]>) {
+    memoColWidth(state, action: PayloadAction<[string, number]>) {
       const [colId, colSize] = action.payload;
       state[colId] = colSize;
     },
   },
 });
 
-export const { addOrUpdateColWidth } = columnSlice.actions;
+export const { memoColWidth: addOrUpdateColWidth } = columnSlice.actions;
 export default columnSlice.reducer;

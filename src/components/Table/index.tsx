@@ -6,7 +6,8 @@ import { PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { extractFieldsFromData } from './services';
 import { RootState } from '../../store';
-import { addOrUpdateColWidth } from './slices/columnSlice';
+import { memoColWidth } from './slices/columnSlice';
+import Sidebar from './Sidebar';
 
 export interface IResult {
   [key: string]: string;
@@ -18,13 +19,9 @@ interface ITableProps<T> extends PropsWithChildren {
 
 export default function Table({ loader }: ITableProps<IResult[]>) {
   const dispatch = useDispatch();
-  const colSizes = useSelector((state: RootState) => state.columns);
+  const colProps = useSelector((state: RootState) => state.columns);
 
-  const tableStyle = useMemo(() => ({ width: '100%', height: '100%' }), []);
-  const sidebarStyle = useMemo(
-    () => ({ minWidth: '200px', height: '100%' }),
-    []
-  );
+  const style = useMemo(() => ({ width: '100%', height: '100%' }), []);
 
   const [rowData, setRowData] = useState<IResult[]>([]);
 
@@ -36,22 +33,13 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
     };
   }, []);
 
-  const defaultSidebarColDef = useMemo<ColDef>(() => {
-    return {
-      cellDataType: false,
-      resizable: false,
-      sortable: false,
-      flex: 1,
-    };
-  }, []);
-
   const onColumnResized = (event: ColumnResizedEvent) => {
     if (event.finished) {
       const { column } = event;
       if (column) {
         const colWidth = column.getActualWidth();
         const colId = column.getColId();
-        dispatch(addOrUpdateColWidth([colId, colWidth]));
+        dispatch(memoColWidth([colId, colWidth]));
       }
     }
   };
@@ -59,15 +47,15 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
   const onGridReady = useCallback(async () => {
     const results = await loader();
     setRowData(results);
-    setColDefs([...extractFieldsFromData(results, colSizes)]);
-  }, [colSizes, loader]);
+    setColDefs([...extractFieldsFromData(results, colProps)]);
+  }, [colProps, loader]);
 
   return (
     <div
       className="grid"
       style={{ width: '100%', height: '100%', display: 'flex', gap: '20px' }}
     >
-      <div className={'ag-theme-quartz-dark'} style={tableStyle}>
+      <div className={'ag-theme-quartz-dark'} style={style}>
         <AgGridReact
           rowData={rowData}
           columnDefs={colDefs}
@@ -76,23 +64,9 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
           onGridReady={onGridReady}
         />
       </div>
-      <div className={'ag-theme-quartz-dark'} style={sidebarStyle}>
-        <AgGridReact
-          rowData={[
-            { fieldName: 'Col1' },
-            { fieldName: 'Col2' },
-            { fieldName: 'Col3' },
-          ]}
-          columnDefs={[
-            {
-              headerName: 'Filter',
-              field: 'fieldName',
-              checkboxSelection: true,
-            },
-          ]}
-          defaultColDef={defaultSidebarColDef}
-        />
-      </div>
+      {colDefs.length ? (
+        <Sidebar fields={colDefs} updateColDefs={setColDefs} />
+      ) : null}
     </div>
   );
 }
