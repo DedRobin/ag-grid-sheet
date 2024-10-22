@@ -7,17 +7,19 @@ import {
 import { AgGridReact } from 'ag-grid-react';
 import { Dispatch, PropsWithChildren, useMemo } from 'react';
 import { IResult } from '.';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store';
+import { memoColHiding } from './slices/columnSlice';
 
 interface ISidebar extends PropsWithChildren {
   fields: ColDef<IResult>[];
-  updateColDefs: Dispatch<React.SetStateAction<ColDef<IResult>[]>>;
+  updateCols: Dispatch<React.SetStateAction<ColDef<IResult>[]>>;
 }
 
-export default function Sidebar({
-  updateColDefs: updateCols,
-  fields: colDefs,
-}: ISidebar) {
-  const rowData = colDefs.map(({ field }) => ({ field }));
+export default function Sidebar({ fields, updateCols }: ISidebar) {
+  const dispatch = useDispatch();
+  const colProps = useSelector((state: RootState) => state.columns);
+  const rowData = fields.map(({ field }) => ({ field }));
   const columnDefs = [
     {
       headerName: 'Column filter',
@@ -35,23 +37,41 @@ export default function Sidebar({
   }, []);
 
   const onRowSelected = (event: RowSelectedEvent) => {
-    const isSelected = event.node.isSelected();
+    // Memo hiding state when row is selected
+    const isHidden = !event.node.isSelected();
     const { field } = event.data;
 
-    if (colDefs) {
-      updateCols(
-        colDefs.map((col) => {
-          if (col.field === field) {
-            col.hide = !isSelected;
-          }
-          return col;
-        })
-      );
-    }
+    updateCols(
+      fields.map((col) => {
+        if (col.field === field) {
+          col.hide = isHidden;
+          dispatch(memoColHiding([field, isHidden]));
+        }
+        return col;
+      })
+    );
   };
 
   const onGridReady = (event: GridReadyEvent) => {
-    event.api.forEachNode((node) => node.setSelected(true));
+    const hiddenCols: string[] = [];
+
+    // Restore column selection from Redux
+    event.api.forEachNode((node) => {
+      const { field } = node.data;
+      const isSelected = !colProps[field]?.isHidden;
+      node.setSelected(isSelected);
+      if (!isSelected) hiddenCols.push(field);
+    });
+
+    // Update parent table by changing its state (using the 'set' function)
+    updateCols(
+      fields.map((col) => {
+        if (col.field && hiddenCols.includes(col.field)) {
+          col.hide = true;
+        }
+        return col;
+      })
+    );
   };
 
   const gridOptions: GridOptions = {

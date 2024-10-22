@@ -27,7 +27,7 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
 
   const [colDefs, setColDefs] = useState<ColDef<IResult>[]>([]);
 
-  const defaultTableColDef = useMemo<ColDef>(() => {
+  const defaultColDef = useMemo<ColDef>(() => {
     return {
       cellDataType: false,
     };
@@ -59,13 +59,13 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
         <AgGridReact
           rowData={rowData}
           columnDefs={colDefs}
-          defaultColDef={defaultTableColDef}
+          defaultColDef={defaultColDef}
           onColumnResized={onColumnResized}
           onGridReady={onGridReady}
         />
       </div>
       {colDefs.length ? (
-        <Sidebar fields={colDefs} updateColDefs={setColDefs} />
+        <Sidebar fields={colDefs} updateCols={setColDefs} />
       ) : null}
     </div>
   );
