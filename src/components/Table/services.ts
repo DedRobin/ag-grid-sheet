@@ -6,16 +6,19 @@ export function extractFieldsFromData(
   results: { [key: string]: string }[],
   colProps: IColumnState
 ): ColDef<IResult>[] {
-  const fields: ColDef<IResult>[] = [];
+  const colDefs: ColDef<IResult>[] = [];
 
-  const headerNames = Object.keys(results[0]);
-  headerNames.forEach((field) => {
-    fields.push(
-      field in colProps
-        ? { field, width: colProps[field].width }
-        : { field, flex: 1 }
-    );
+  const resultFields = Object.keys(results[0]);
+  resultFields.forEach((field) => {
+    const colDef: ColDef = {
+      field,
+      ...colProps[field],
+    };
+
+    if (!colProps[field]?.width) colDef.flex = 1;
+
+    colDefs.push(colDef);
   });
 
-  return fields;
+  return colDefs;
 }

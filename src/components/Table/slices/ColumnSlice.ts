@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface IColumnState {
-  [key: string]: { width?: number; isHidden?: boolean };
+  [key: string]: { width?: number; hide?: boolean };
 }
 
 const initialState: IColumnState = {};
@@ -16,7 +16,7 @@ export const columnSlice = createSlice({
     },
     memoColHiding(state, action: PayloadAction<[string, boolean]>) {
       const [colId, isHidden] = action.payload;
-      state[colId] = { ...state[colId], isHidden };
+      state[colId] = { ...state[colId], hide: isHidden };
     },
   },
 });

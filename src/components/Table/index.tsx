@@ -30,6 +30,7 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
   const defaultColDef = useMemo<ColDef>(() => {
     return {
       cellDataType: false,
+      minWidth: 150,
     };
   }, []);
 

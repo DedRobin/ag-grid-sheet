@@ -58,7 +58,7 @@ export default function Sidebar({ fields, updateCols }: ISidebar) {
     // Restore column selection from Redux
     event.api.forEachNode((node) => {
       const { field } = node.data;
-      const isSelected = !colProps[field]?.isHidden;
+      const isSelected = !colProps[field]?.hide;
       node.setSelected(isSelected);
       if (!isSelected) hiddenCols.push(field);
     });

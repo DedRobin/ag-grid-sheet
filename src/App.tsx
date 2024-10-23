@@ -11,7 +11,7 @@ const App = () => {
       >
         CLear LS
       </button>
-      <Table loader={swapiLoader} />;
+      <Table loader={swapiLoader} />
     </>
   );
 };
