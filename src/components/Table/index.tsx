@@ -2,35 +2,35 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import { ColDef, ColumnResizedEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import { PropsWithChildren, useMemo, useState } from 'react';
+import { PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { extractFieldsFromData } from './services';
+import { convertToColDefs } from './services';
 import { RootState } from '../../store';
-import { addOrUpdateColWidth } from './slices/ColumnSlice';
+import { memoColWidth } from './slices/columnSlice';
+import Sidebar from './Sidebar';
 
-export interface IResults {
+export interface IResult {
   [key: string]: string;
 }
 
-interface ITableProps extends PropsWithChildren {
-  results: IResults[];
+interface ITableProps<T> extends PropsWithChildren {
+  loader: () => Promise<T>;
 }
 
-export default function Table({ results }: ITableProps) {
+export default function Table({ loader }: ITableProps<IResult[]>) {
   const dispatch = useDispatch();
-  const colSizes = useSelector((state: RootState) => state.columnSize);
+  const columnStore = useSelector((state: RootState) => state.columns);
 
   const style = useMemo(() => ({ width: '100%', height: '100%' }), []);
 
-  const [rowData, setRowData] = useState<IResults[]>(results);
+  const [rowData, setRowData] = useState<IResult[]>([]);
 
-  const [colDefs, setColDefs] = useState<ColDef<IResults>[]>([
-    ...extractFieldsFromData(results, colSizes),
-  ]);
+  const [colDefs, setColDefs] = useState<ColDef<IResult>[]>([]);
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
       cellDataType: false,
+      minWidth: 150,
     };
   }, []);
 
@@ -40,19 +40,35 @@ export default function Table({ results }: ITableProps) {
       if (column) {
         const colWidth = column.getActualWidth();
         const colId = column.getColId();
-        dispatch(addOrUpdateColWidth([colId, colWidth]));
+        dispatch(memoColWidth([colId, colWidth]));
       }
     }
   };
 
+  const onGridReady = useCallback(async () => {
+    const results = await loader();
+    setRowData(results);
+    const colDefs = convertToColDefs(results, columnStore);
+    setColDefs(colDefs);
+  }, [columnStore, loader]);
+
   return (
-    <div className={'ag-theme-quartz-dark'} style={style}>
-      <AgGridReact
-        rowData={rowData}
-        columnDefs={colDefs}
-        defaultColDef={defaultColDef}
-        onColumnResized={onColumnResized}
-      />
+    <div
+      className="grid"
+      style={{ width: '100%', height: '100%', display: 'flex', gap: '20px' }}
+    >
+      <div className={'ag-theme-quartz-dark'} style={style}>
+        <AgGridReact
+          rowData={rowData}
+          columnDefs={colDefs}
+          defaultColDef={defaultColDef}
+          onColumnResized={onColumnResized}
+          onGridReady={onGridReady}
+        />
+      </div>
+      {colDefs.length ? (
+        <Sidebar fields={colDefs} updateCols={setColDefs} />
+      ) : null}
     </div>
   );
 }

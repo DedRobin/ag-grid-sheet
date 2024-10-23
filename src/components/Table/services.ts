@@ -1,18 +1,24 @@
 import { ColDef } from 'ag-grid-community';
-import { IResults } from '.';
+import { IResult } from '.';
+import { IColumnState } from './slices/columnSlice';
 
-export function extractFieldsFromData(
+export function convertToColDefs(
   results: { [key: string]: string }[],
-  colSizes: { [key: string]: number }
-): ColDef<IResults>[] {
-  const fields: ColDef<IResults>[] = [];
+  columnStore: IColumnState
+): ColDef<IResult>[] {
+  const colDefs: ColDef<IResult>[] = [];
 
-  const headerNames = Object.keys(results[0]);
-  headerNames.forEach((field) => {
-    fields.push(
-      field in colSizes ? { field, width: colSizes[field] } : { field, flex: 1 }
-    );
+  const resultFields = Object.keys(results[0]);
+  resultFields.forEach((field) => {
+    const colDef: ColDef = {
+      field,
+      ...columnStore[field],
+    };
+
+    if (!columnStore[field]?.width) colDef.flex = 1;
+
+    colDefs.push(colDef);
   });
 
-  return fields;
+  return colDefs;
 }

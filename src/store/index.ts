@@ -10,7 +10,7 @@ import {
   REGISTER,
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
-import columnReducer from '../components/Table/slices/Columnslice';
+import columnReducer from '../components/Table/slices/columnSlice';
 
 const persistConfig = {
   key: 'root',
@@ -18,7 +18,7 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
-  columnSize: columnReducer,
+  columns: columnReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

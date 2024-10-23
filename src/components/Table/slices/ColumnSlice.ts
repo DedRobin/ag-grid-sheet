@@ -1,21 +1,25 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export interface ColumnState {
-  [key: string]: number;
+export interface IColumnState {
+  [key: string]: { width?: number; hide?: boolean };
 }
 
-const initialState: ColumnState = {};
+const initialState: IColumnState = {};
 
 export const columnSlice = createSlice({
   name: 'columns',
   initialState,
   reducers: {
-    addOrUpdateColWidth(state, action: PayloadAction<[string, number]>) {
-      const [colId, colSize] = action.payload;
-      state[colId] = colSize;
+    memoColWidth(state, action: PayloadAction<[string, number]>) {
+      const [colId, width] = action.payload;
+      state[colId] = { ...state[colId], width };
+    },
+    memoColHiding(state, action: PayloadAction<[string, boolean]>) {
+      const [colId, isHidden] = action.payload;
+      state[colId] = { ...state[colId], hide: isHidden };
     },
   },
 });
 
-export const { addOrUpdateColWidth } = columnSlice.actions;
+export const { memoColWidth, memoColHiding } = columnSlice.actions;
 export default columnSlice.reducer;
