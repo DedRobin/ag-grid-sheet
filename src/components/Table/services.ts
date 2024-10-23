@@ -2,9 +2,9 @@ import { ColDef } from 'ag-grid-community';
 import { IResult } from '.';
 import { IColumnState } from './slices/columnSlice';
 
-export function extractFieldsFromData(
+export function convertToColDefs(
   results: { [key: string]: string }[],
-  colProps: IColumnState
+  columnStore: IColumnState
 ): ColDef<IResult>[] {
   const colDefs: ColDef<IResult>[] = [];
 
@@ -12,10 +12,10 @@ export function extractFieldsFromData(
   resultFields.forEach((field) => {
     const colDef: ColDef = {
       field,
-      ...colProps[field],
+      ...columnStore[field],
     };
 
-    if (!colProps[field]?.width) colDef.flex = 1;
+    if (!columnStore[field]?.width) colDef.flex = 1;
 
     colDefs.push(colDef);
   });

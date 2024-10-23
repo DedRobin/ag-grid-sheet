@@ -4,7 +4,7 @@ import { ColDef, ColumnResizedEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { extractFieldsFromData } from './services';
+import { convertToColDefs } from './services';
 import { RootState } from '../../store';
 import { memoColWidth } from './slices/columnSlice';
 import Sidebar from './Sidebar';
@@ -19,7 +19,7 @@ interface ITableProps<T> extends PropsWithChildren {
 
 export default function Table({ loader }: ITableProps<IResult[]>) {
   const dispatch = useDispatch();
-  const colProps = useSelector((state: RootState) => state.columns);
+  const columnStore = useSelector((state: RootState) => state.columns);
 
   const style = useMemo(() => ({ width: '100%', height: '100%' }), []);
 
@@ -48,8 +48,9 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
   const onGridReady = useCallback(async () => {
     const results = await loader();
     setRowData(results);
-    setColDefs([...extractFieldsFromData(results, colProps)]);
-  }, [colProps, loader]);
+    const colDefs = convertToColDefs(results, columnStore);
+    setColDefs(colDefs);
+  }, [columnStore, loader]);
 
   return (
     <div
