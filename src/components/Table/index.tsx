@@ -1,12 +1,16 @@
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
-import { ColDef, ColumnResizedEvent } from 'ag-grid-community';
+import {
+  ColDef,
+  ColumnMovedEvent,
+  ColumnResizedEvent,
+} from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { convertToColDefs } from './services';
 import { RootState } from '../../store';
-import { memoColWidth } from './slices/columnSlice';
+import { memoColOrder, memoColWidth } from './slices/columnSlice';
 import Sidebar from './Sidebar';
 
 export interface IResult {
@@ -45,6 +49,16 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
     }
   };
 
+  const onColumnMoved = (event: ColumnMovedEvent) => {
+    if (event.finished) {
+      const allColumns = event.api.getAllDisplayedColumns();
+      allColumns.forEach((column, orderIndex) => {
+        const colId = column.getColId();
+        dispatch(memoColOrder([colId, orderIndex]));
+      });
+    }
+  };
+
   const onGridReady = useCallback(async () => {
     const results = await loader();
     setRowData(results);
@@ -63,6 +77,7 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
           columnDefs={colDefs}
           defaultColDef={defaultColDef}
           onColumnResized={onColumnResized}
+          onColumnMoved={onColumnMoved}
           onGridReady={onGridReady}
         />
       </div>
