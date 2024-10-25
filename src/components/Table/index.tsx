@@ -1,9 +1,11 @@
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import {
+  CellKeyDownEvent,
   ColDef,
   ColumnMovedEvent,
   ColumnResizedEvent,
+  RowClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { PropsWithChildren, useCallback, useMemo, useState } from 'react';
@@ -59,12 +61,31 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
     }
   };
 
+  const onRowClicked = (event: RowClickedEvent) => {
+    const pointerEvent = event.event;
+    if (pointerEvent instanceof PointerEvent && pointerEvent.ctrlKey) {
+      const isSelected = event.node.isSelected();
+      event.node.setSelected(!isSelected);
+    }
+  };
+
   const onGridReady = useCallback(async () => {
     const results = await loader();
     setRowData(results);
     const colDefs = convertToColDefs(results, columnStore);
     setColDefs(colDefs);
   }, [columnStore, loader]);
+
+  const onCellKeyDown = (event: CellKeyDownEvent) => {
+    const keyboardEvent = event.event;
+    if (keyboardEvent instanceof KeyboardEvent) {
+      if (keyboardEvent.ctrlKey && keyboardEvent.key === 'a') {
+        const allNodes = event.api.getRenderedNodes();
+        const areSelected = allNodes.every((node) => node.isSelected());
+        event.api.forEachNode((node) => node.setSelected(!areSelected));
+      }
+    }
+  };
 
   return (
     <div
@@ -76,8 +97,11 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
           rowData={rowData}
           columnDefs={colDefs}
           defaultColDef={defaultColDef}
+          rowSelection={{ mode: 'multiRow' }}
           onColumnResized={onColumnResized}
           onColumnMoved={onColumnMoved}
+          onRowClicked={onRowClicked}
+          onCellKeyDown={onCellKeyDown}
           onGridReady={onGridReady}
         />
       </div>
