@@ -1,6 +1,7 @@
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import {
+  _log,
   ColDef,
   ColumnMovedEvent,
   ColumnResizedEvent,
@@ -76,6 +77,7 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
           rowData={rowData}
           columnDefs={colDefs}
           defaultColDef={defaultColDef}
+          rowSelection={{ mode: 'multiRow' }}
           onColumnResized={onColumnResized}
           onColumnMoved={onColumnMoved}
           onGridReady={onGridReady}

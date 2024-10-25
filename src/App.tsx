@@ -5,12 +5,15 @@ import { swapiLoader } from './api/swapi';
 const App = () => {
   return (
     <>
-      {/* <button
-        onClick={() => localStorage.clear()}
+      <button
+        onClick={() => {
+          localStorage.clear();
+          location.reload();
+        }}
         style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
       >
         CLear LS
-      </button> */}
+      </button>
       <Table loader={swapiLoader} />
     </>
   );
