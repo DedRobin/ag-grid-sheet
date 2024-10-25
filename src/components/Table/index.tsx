@@ -5,6 +5,7 @@ import {
   ColDef,
   ColumnMovedEvent,
   ColumnResizedEvent,
+  RowClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { PropsWithChildren, useCallback, useMemo, useState } from 'react';
@@ -60,6 +61,14 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
     }
   };
 
+  const onRowClicked = (event: RowClickedEvent) => {
+    const pointerEvent = event.event;
+    if (pointerEvent instanceof PointerEvent && pointerEvent.ctrlKey) {
+      const isSelected = event.node.isSelected();
+      event.node.setSelected(!isSelected);
+    }
+  };
+
   const onGridReady = useCallback(async () => {
     const results = await loader();
     setRowData(results);
@@ -80,6 +89,7 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
           rowSelection={{ mode: 'multiRow' }}
           onColumnResized={onColumnResized}
           onColumnMoved={onColumnMoved}
+          onRowClicked={onRowClicked}
           onGridReady={onGridReady}
         />
       </div>
