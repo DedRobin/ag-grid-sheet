@@ -1,7 +1,7 @@
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import {
-  _log,
+  CellKeyDownEvent,
   ColDef,
   ColumnMovedEvent,
   ColumnResizedEvent,
@@ -76,6 +76,17 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
     setColDefs(colDefs);
   }, [columnStore, loader]);
 
+  const onCellKeyDown = (event: CellKeyDownEvent) => {
+    const keyboardEvent = event.event;
+    if (keyboardEvent instanceof KeyboardEvent) {
+      if (keyboardEvent.ctrlKey && keyboardEvent.key === 'a') {
+        const allNodes = event.api.getRenderedNodes();
+        const areSelected = allNodes.every((node) => node.isSelected());
+        event.api.forEachNode((node) => node.setSelected(!areSelected));
+      }
+    }
+  };
+
   return (
     <div
       className="grid"
@@ -90,6 +101,7 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
           onColumnResized={onColumnResized}
           onColumnMoved={onColumnMoved}
           onRowClicked={onRowClicked}
+          onCellKeyDown={onCellKeyDown}
           onGridReady={onGridReady}
         />
       </div>
