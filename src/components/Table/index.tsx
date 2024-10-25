@@ -79,7 +79,7 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
   const onCellKeyDown = (event: CellKeyDownEvent) => {
     const keyboardEvent = event.event;
     if (keyboardEvent instanceof KeyboardEvent) {
-      if (keyboardEvent.ctrlKey && keyboardEvent.key === 'a') {
+      if (keyboardEvent.ctrlKey && keyboardEvent.code === 'KeyA') {
         const allNodes = event.api.getRenderedNodes();
         const areSelected = allNodes.every((node) => node.isSelected());
         event.api.forEachNode((node) => node.setSelected(!areSelected));

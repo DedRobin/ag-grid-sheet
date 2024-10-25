@@ -81,6 +81,7 @@ export default function Sidebar({ fields, updateCols }: ISidebar) {
     rowSelection: {
       mode: 'multiRow',
     },
+    suppressCellFocus: true,
     onGridReady,
     onRowSelected,
   };
