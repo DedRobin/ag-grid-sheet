@@ -84,6 +84,9 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
         const areSelected = allNodes.every((node) => node.isSelected());
         event.api.forEachNode((node) => node.setSelected(!areSelected));
       }
+      if (keyboardEvent.ctrlKey && keyboardEvent.code === 'KeyC') {
+        navigator.clipboard.writeText(event.value);
+      }
     }
   };
 
