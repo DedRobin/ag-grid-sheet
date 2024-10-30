@@ -53,7 +53,7 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
 
   const onColumnMoved = (event: ColumnMovedEvent) => {
     if (event.finished) {
-      const allColumns = event.api.getAllDisplayedColumns();
+      const allColumns = event.api.getAllDisplayedColumns().slice(1);
       allColumns.forEach((column, orderIndex) => {
         const colId = column.getColId();
         dispatch(memoColOrder([colId, orderIndex]));
