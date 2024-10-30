@@ -85,7 +85,13 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
         event.api.forEachNode((node) => node.setSelected(!areSelected));
       }
       if (keyboardEvent.ctrlKey && keyboardEvent.code === 'KeyC') {
-        navigator.clipboard.writeText(event.value);
+        const rowIsSelected = event.node.isSelected();
+        if (rowIsSelected) {
+          const values = Object.values(event.data).slice(0, 5);
+          navigator.clipboard.writeText(values.join('\t'));
+        } else {
+          navigator.clipboard.writeText(event.value);
+        }
       }
     }
   };
