@@ -35,12 +35,22 @@ export function selectAllRows(event: CellKeyDownEvent) {
 }
 
 export function copyToClipboard(event: CellKeyDownEvent) {
-  const rowIsSelected = event.node.isSelected();
-  if (rowIsSelected) {
-    const values = Object.values(event.data);
-    navigator.clipboard.writeText(values.join('\t'));
+  const selectedNodes = event.api.getSelectedNodes();
+  if (selectedNodes.length >= 2) {
+    const rowValues: Array<unknown> = [];
+    selectedNodes.forEach((node) => {
+      const values = Object.values(node.data);
+      rowValues.push(values.join('\t'));
+    });
+    navigator.clipboard.writeText(rowValues.join('\n'));
   } else {
-    navigator.clipboard.writeText(event.value);
+    const rowIsSelected = event.node.isSelected();
+    if (rowIsSelected) {
+      const values = Object.values(event.data);
+      navigator.clipboard.writeText(values.join('\t'));
+    } else {
+      navigator.clipboard.writeText(event.value);
+    }
   }
 }
 
