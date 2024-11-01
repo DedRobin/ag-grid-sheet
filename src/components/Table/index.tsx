@@ -10,7 +10,13 @@ import {
 import { AgGridReact } from 'ag-grid-react';
 import { PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { convertToColDefs } from './services';
+import {
+  convertToColDefs,
+  copyToClipboard,
+  isCtrlA,
+  isCtrlC,
+  selectAllRows,
+} from './services';
 import { RootState } from '../../store';
 import { memoColOrder, memoColWidth } from './slices/columnSlice';
 import Sidebar from './Sidebar';
@@ -79,20 +85,8 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
   const onCellKeyDown = (event: CellKeyDownEvent) => {
     const keyboardEvent = event.event;
     if (keyboardEvent instanceof KeyboardEvent) {
-      if (keyboardEvent.ctrlKey && keyboardEvent.code === 'KeyA') {
-        const allNodes = event.api.getRenderedNodes();
-        const areSelected = allNodes.every((node) => node.isSelected());
-        event.api.forEachNode((node) => node.setSelected(!areSelected));
-      }
-      if (keyboardEvent.ctrlKey && keyboardEvent.code === 'KeyC') {
-        const rowIsSelected = event.node.isSelected();
-        if (rowIsSelected) {
-          const values = Object.values(event.data).slice(0, 5);
-          navigator.clipboard.writeText(values.join('\t'));
-        } else {
-          navigator.clipboard.writeText(event.value);
-        }
-      }
+      if (isCtrlA(keyboardEvent)) selectAllRows(event);
+      if (isCtrlC(keyboardEvent)) copyToClipboard(event);
     }
   };
 

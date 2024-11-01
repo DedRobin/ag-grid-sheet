@@ -1,4 +1,4 @@
-import { ColDef } from 'ag-grid-community';
+import { CellKeyDownEvent, ColDef } from 'ag-grid-community';
 import { IResult } from '.';
 import { IColumnState } from './slices/columnSlice';
 
@@ -27,3 +27,25 @@ export function convertToColDefs(
 
   return colDefs;
 }
+
+export function selectAllRows(event: CellKeyDownEvent) {
+  const allNodes = event.api.getRenderedNodes();
+  const areSelected = allNodes.every((node) => node.isSelected());
+  event.api.forEachNode((node) => node.setSelected(!areSelected));
+}
+
+export function copyToClipboard(event: CellKeyDownEvent) {
+  const rowIsSelected = event.node.isSelected();
+  if (rowIsSelected) {
+    const values = Object.values(event.data);
+    navigator.clipboard.writeText(values.join('\t'));
+  } else {
+    navigator.clipboard.writeText(event.value);
+  }
+}
+
+export const isCtrlA = (event: KeyboardEvent) =>
+  event.ctrlKey && event.code === 'KeyA';
+
+export const isCtrlC = (event: KeyboardEvent) =>
+  event.ctrlKey && event.code === 'KeyC';
