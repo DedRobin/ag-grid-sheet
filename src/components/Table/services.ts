@@ -16,25 +16,30 @@ export function convertToColDefs(
   const resultFields = Object.entries(results[0]);
   resultFields.forEach((entry, defaultIndex) => {
     const [field, data] = entry;
-    const colProps = { ...columnStore[field] };
-    delete colProps.orderIndex;
+
+    // Data from global store
+    const storeColProps = { ...columnStore[field] };
+    delete storeColProps.orderIndex; // This property is not for ColDef object
+
+    // Additional properties if data is array (set as multiple select cell)
+    const editableColDefParams = isNotEmptyArray(data) && {
+      editable: true,
+      cellEditor: 'agSelectCellEditor',
+      cellEditorParams: {
+        values: data,
+      } as ISelectCellEditorParams,
+    };
 
     const colDef: ColDef = {
       field,
-      ...colProps,
-      editable: isNotEmptyArray(data),
-      cellEditor: isNotEmptyArray(data) ? 'agSelectCellEditor' : undefined,
-      cellEditorParams: isNotEmptyArray(data)
-        ? ({
-            values: data,
-          } as ISelectCellEditorParams)
-        : undefined,
+      ...storeColProps,
+      ...editableColDefParams,
     };
 
     if (!columnStore[field]?.width) colDef.flex = 1;
 
+    // Restore column order
     const storedIndex = columnStore[field]?.orderIndex;
-
     colDefs[storedIndex ?? defaultIndex] = colDef;
   });
 
@@ -45,7 +50,7 @@ export function convertToValidRowData(data: IResult[]) {
   return data.map((result) => {
     for (const field in result) {
       if (isNotEmptyArray(result[field])) {
-        result[field] = result[field][0]; // 0 is temp. Index must be received from global state
+        result[field] = result[field][0];
       }
     }
     return result;
