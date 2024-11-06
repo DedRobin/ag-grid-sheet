@@ -1,6 +1,7 @@
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import {
+  CellEditingStoppedEvent,
   CellKeyDownEvent,
   ColDef,
   ColumnMovedEvent,
@@ -13,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   convertToColDefs,
   copyToClipboard,
+  convertToValidRowData,
   isCtrlA,
   isCtrlC,
   selectAllRows,
@@ -46,49 +48,58 @@ export default function Table({ loader }: ITableProps<IResult[]>) {
     };
   }, []);
 
-  const onColumnResized = (event: ColumnResizedEvent) => {
-    if (event.finished) {
-      const { column } = event;
-      if (column) {
-        const colWidth = column.getActualWidth();
-        const colId = column.getColId();
-        dispatch(memoColWidth([colId, colWidth]));
+  const onColumnResized = useCallback(
+    (event: ColumnResizedEvent) => {
+      if (event.finished) {
+        const { column } = event;
+        if (column) {
+          const colWidth = column.getActualWidth();
+          const colId = column.getColId();
+          dispatch(memoColWidth([colId, colWidth]));
+        }
       }
-    }
-  };
+    },
+    [dispatch]
+  );
 
-  const onColumnMoved = (event: ColumnMovedEvent) => {
-    if (event.finished) {
-      const allColumns = event.api.getAllDisplayedColumns().slice(1);
-      allColumns.forEach((column, orderIndex) => {
-        const colId = column.getColId();
-        dispatch(memoColOrder([colId, orderIndex]));
-      });
-    }
-  };
+  const onColumnMoved = useCallback(
+    (event: ColumnMovedEvent) => {
+      if (event.finished) {
+        const allColumns = event.api.getAllDisplayedColumns().slice(1);
+        allColumns.forEach((column, orderIndex) => {
+          const colId = column.getColId();
+          dispatch(memoColOrder([colId, orderIndex]));
+        });
+      }
+    },
+    [dispatch]
+  );
 
-  const onRowClicked = (event: RowClickedEvent) => {
+  const onRowClicked = useCallback((event: RowClickedEvent) => {
     const pointerEvent = event.event;
     if (pointerEvent instanceof PointerEvent && pointerEvent.ctrlKey) {
       const isSelected = event.node.isSelected();
       event.node.setSelected(!isSelected);
     }
-  };
+  }, []);
 
-  const onGridReady = useCallback(async () => {
-    const results = await loader();
-    setRowData(results);
-    const colDefs = convertToColDefs(results, columnStore);
-    setColDefs(colDefs);
-  }, [columnStore, loader]);
-
-  const onCellKeyDown = (event: CellKeyDownEvent) => {
+  const onCellKeyDown = useCallback((event: CellKeyDownEvent) => {
     const keyboardEvent = event.event;
     if (keyboardEvent instanceof KeyboardEvent) {
       if (isCtrlA(keyboardEvent)) selectAllRows(event);
       if (isCtrlC(keyboardEvent)) copyToClipboard(event);
     }
-  };
+  }, []);
+
+  const onGridReady = useCallback(async () => {
+    const results = await loader();
+
+    const colDefs = convertToColDefs(results, columnStore);
+    setColDefs(colDefs);
+
+    const rowData = convertToValidRowData(results);
+    setRowData(rowData);
+  }, [columnStore, loader]);
 
   return (
     <div

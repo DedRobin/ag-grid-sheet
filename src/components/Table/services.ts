@@ -1,6 +1,11 @@
-import { CellKeyDownEvent, ColDef } from 'ag-grid-community';
+import {
+  CellKeyDownEvent,
+  ColDef,
+  ISelectCellEditorParams,
+} from 'ag-grid-community';
 import { IResult } from '.';
 import { IColumnState } from './slices/columnSlice';
+import { isNotEmptyArray } from '../../tools/array';
 
 export function convertToColDefs(
   results: { [key: string]: string }[],
@@ -8,14 +13,22 @@ export function convertToColDefs(
 ): ColDef<IResult>[] {
   const colDefs: ColDef<IResult>[] = new Array(results.length);
 
-  const resultFields = Object.keys(results[0]);
-  resultFields.forEach((field, defaultIndex) => {
+  const resultFields = Object.entries(results[0]);
+  resultFields.forEach((entry, defaultIndex) => {
+    const [field, data] = entry;
     const colProps = { ...columnStore[field] };
     delete colProps.orderIndex;
 
     const colDef: ColDef = {
       field,
       ...colProps,
+      editable: isNotEmptyArray(data),
+      cellEditor: isNotEmptyArray(data) ? 'agSelectCellEditor' : undefined,
+      cellEditorParams: isNotEmptyArray(data)
+        ? ({
+            values: data,
+          } as ISelectCellEditorParams)
+        : undefined,
     };
 
     if (!columnStore[field]?.width) colDef.flex = 1;
@@ -26,6 +39,17 @@ export function convertToColDefs(
   });
 
   return colDefs;
+}
+
+export function convertToValidRowData(data: IResult[]) {
+  return data.map((result) => {
+    for (const field in result) {
+      if (isNotEmptyArray(result[field])) {
+        result[field] = result[field][0]; // 0 is temp. Index must be received from global state
+      }
+    }
+    return result;
+  });
 }
 
 export function selectAllRows(event: CellKeyDownEvent) {
